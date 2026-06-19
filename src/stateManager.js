@@ -219,6 +219,12 @@ export class StateManager {
                 duration: 1.2,
                 ease: 'power2.out'
             }, '-=0.5')
+            .to('.thankyou-message', {
+                opacity: 0.95,
+                y: 0,
+                duration: 1.2,
+                ease: 'power2.out'
+            }, '-=0.5')
             .to('.heart-icon-end', {
                 opacity: 1,
                 scale: 1.2,

@@ -17,11 +17,11 @@ export class MemorySlideshow {
         this.currentIndex = -1;
         
         this.memoriesData = [
-            { text: "Cozy coffee talks", file: "textures/memory_1.jpg", isVideo: false },
-            { text: "Under starry skies", file: "textures/memory_2.jpg", isVideo: false },
-            { text: "Laughing in the rain", file: "textures/memory_3.jpg", isVideo: false },
-            { text: "Golden hour shoreline", file: "textures/memory_4.jpg", isVideo: false },
-            { text: "Scenic long roads", file: "textures/memory_5.jpg", isVideo: false },
+            { text: "our noodles dates", file: "textures/memory_1.jpg", isVideo: false },
+            { text: "our cutiee snaps", file: "textures/memory_2.jpg", isVideo: false },
+            { text: "you bunk colledge to meet with me", file: "textures/memory_3.jpg", isVideo: false },
+            { text: "the Zoo one", file: "textures/memory_4.jpg", isVideo: false },
+            { text: "the cuttest one", file: "textures/memory_5.jpg", isVideo: false },
             { text: "A memory in motion", file: "textures/memory_video.mp4", isVideo: true }
         ];
         
