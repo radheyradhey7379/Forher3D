@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You</title>
+    <!-- Premium Typography from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+    <!-- WebGL Canvas for Three.js -->
+    <canvas id="webgl-canvas" class="blur-active"></canvas>
+
+    <!-- Custom Cursor -->
+    <div id="custom-cursor"></div>
+
+    <!-- Music Control -->
+    <button id="music-toggle" aria-label="Toggle Music" class="music-btn">
+        <svg class="music-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 18V5l12-2v13" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="6" cy="18" r="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="18" cy="16" r="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="music-text">PLAY AMBIENT</span>
+    </button>
+
+    <!-- State 1: Passcode Overlay -->
+    <div id="ui-passcode" class="ui-layer active">
+        <div class="glass-card passcode-card">
+            <h1 class="title-gate">FOR YOU</h1>
+            <p class="subtitle-gate">A quiet journey into what we were, and what we could be.</p>
+            <div class="input-container">
+                <input type="password" id="pass-input" placeholder="PASSCODE" maxlength="4" autofocus>
+                <div class="input-glow"></div>
+            </div>
+            <button id="btn-unlock" class="glow-button">Unlock</button>
+            <p id="pass-error" class="error-text">The key is "LOVE" or "1208"</p>
+        </div>
+    </div>
+
+    <!-- State 2: Memories Slideshow Overlay -->
+    <div id="ui-memories" class="ui-layer">
+        <div class="memories-header">
+            <h2>OUR MOMENTS</h2>
+            <div class="header-divider"></div>
+        </div>
+        
+        <div class="slideshow-controls">
+            <span id="slide-counter" class="slide-counter">Moment 1 of 6</span>
+            <button id="btn-next-moment" class="glow-button slide-btn">Next Moment</button>
+        </div>
+    </div>
+
+    <!-- State 3: The Paragraph (Apology) Overlay -->
+    <div id="ui-paragraph" class="ui-layer">
+        <div class="apology-container">
+            <div id="para-text" class="poetic-text">
+                <p class="apology-line">I know things have felt fractured lately, and the silence between us has been heavy.</p>
+                <p class="apology-line">I never meant to let us drift this far. You mean more to me than I have shown, and than I have words to say.</p>
+                <p class="apology-line">I am truly, deeply sorry for my part in this distance.</p>
+                <p class="apology-line">I want to listen, I want to understand, and I want to do better.</p>
+            </div>
+            <button id="btn-final" class="glow-button opacity-zero">What lies ahead?</button>
+        </div>
+    </div>
+
+    <!-- State 4: The Final Page (The Choice) Overlay -->
+    <div id="ui-final" class="ui-layer">
+        <div class="glass-card choice-card">
+            <h2 class="choice-title">Can we start over?</h2>
+            <p class="choice-subtitle">A new page. A fresh start. Together.</p>
+            <div class="options">
+                <button id="btn-yes" class="glow-button yes-btn">Yes</button>
+                <button id="btn-no" class="glow-button no-btn">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- State 5: Thank You Screen (Fade to White Resolution) -->
+    <div id="ui-thankyou" class="ui-layer">
+        <div class="glass-card thankyou-card">
+            <h1 class="thankyou-title">Thank you.</h1>
+            <p class="thankyou-subtitle">Let's build a new story, one day at a time.</p>
+            <div class="heart-icon-end">
+                <svg class="heart-svg-end" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

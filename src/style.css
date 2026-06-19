@@ -1,0 +1,505 @@
+/* Root Theme Variables */
+:root {
+    --bg-color: #030303;
+    --text-color: #f5f5f7;
+    --accent-color: #e0aaff;
+    --primary-color: #ff3366;
+    --glow-color: rgba(255, 51, 102, 0.4);
+    --glass-bg: rgba(10, 5, 15, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+}
+
+/* Core Settings */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-sans);
+    height: 100vh;
+    width: 100vw;
+    -webkit-font-smoothing: antialiased;
+    cursor: none; /* Hide default cursor for custom cursor experience */
+}
+
+/* Custom Cursor */
+#custom-cursor {
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s, background-color 0.3s;
+    mix-blend-mode: difference;
+}
+
+body:hover #custom-cursor {
+    opacity: 1;
+}
+
+/* WebGL Canvas */
+#webgl-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    transition: filter 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.blur-active {
+    filter: blur(15px) brightness(0.35);
+}
+
+/* UI Layer Base */
+.ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.5s cubic-bezier(0.25, 1, 0.5, 1), transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+    transform: translateY(10px);
+}
+
+.ui-layer.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* Glassmorphic Card */
+.glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 48px 40px;
+    width: 90%;
+    max-width: 480px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: border-color 0.5s, box-shadow 0.5s;
+}
+
+.glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 
+                0 0 30px rgba(224, 170, 255, 0.1);
+}
+
+/* Floating Music Button */
+.music-btn {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 10px 18px;
+    border-radius: 30px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    outline: none;
+}
+
+.music-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.05);
+}
+
+.music-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.music-text {
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    font-weight: 500;
+}
+
+/* PASSCODE STATE (1) */
+.title-gate {
+    font-size: 3rem;
+    font-weight: 200;
+    letter-spacing: 12px;
+    margin-bottom: 12px;
+    background: linear-gradient(to right, #ffffff, #c5a3ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: pulseGlow 4s infinite alternate;
+}
+
+.subtitle-gate {
+    font-size: 0.9rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 36px;
+}
+
+.input-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 28px;
+}
+
+#pass-input {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+#pass-input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px rgba(224, 170, 255, 0.2);
+}
+
+#pass-input::placeholder {
+    letter-spacing: 4px;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.2);
+    font-weight: 300;
+}
+
+/* Error and Shake Animations */
+.error-text {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    margin-top: 16px;
+    letter-spacing: 1px;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.error-text.visible {
+    opacity: 0.8;
+    height: auto;
+    margin-top: 16px;
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+}
+
+/* Standard Glow Button */
+.glow-button {
+    width: 100%;
+    padding: 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #000;
+    background: #fff;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    outline: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.glow-button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+}
+
+.glow-button:active {
+    transform: scale(0.98);
+}
+
+/* CAROUSEL STATE (2) */
+.memories-header {
+    position: absolute;
+    top: 50px;
+    text-align: center;
+    z-index: 12;
+}
+
+.memories-header h2 {
+    font-weight: 200;
+    letter-spacing: 8px;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.header-divider {
+    width: 40px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+    margin: 12px auto 0;
+}
+
+.slideshow-controls {
+    position: absolute;
+    bottom: 60px;
+    z-index: 12;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 280px;
+}
+
+.slide-counter {
+    font-size: 0.8rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 300;
+}
+
+.slide-btn {
+    width: 100%;
+}
+
+/* PARAGRAPH STATE (3) */
+.apology-container {
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.poetic-text {
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    line-height: 1.8;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 60px;
+}
+
+.apology-line {
+    margin-bottom: 28px;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.glow-button.opacity-zero {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    width: auto;
+    padding: 16px 40px;
+}
+
+/* CHOICE STATE (4) */
+.choice-card {
+    max-width: 500px;
+    padding: 60px 48px;
+}
+
+.choice-title {
+    font-size: 2.5rem;
+    font-weight: 200;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+    font-family: var(--font-serif);
+}
+
+.choice-subtitle {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+}
+
+.options {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.yes-btn {
+    flex: 1;
+    background: white;
+    color: black;
+}
+
+.no-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.no-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+/* RESOLUTION STATE (5) */
+#ui-thankyou {
+    background: linear-gradient(135deg, #fff2f2 0%, #ffeef2 50%, #ffe3ec 100%);
+    color: #4a3b40;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.thankyou-card {
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 30px;
+    padding: 60px 48px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 30px 60px rgba(255, 117, 143, 0.1), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.thankyou-title {
+    font-family: var(--font-serif);
+    font-size: 4rem;
+    font-style: italic;
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: scale(0.95);
+    color: #ff4d6d;
+    text-shadow: 0 2px 10px rgba(255, 77, 109, 0.1);
+}
+
+.thankyou-subtitle {
+    font-size: 1rem;
+    font-weight: 300;
+    color: #6c585c;
+    letter-spacing: 2px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.heart-icon-end {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    opacity: 0;
+    transform: scale(0);
+}
+
+.heart-svg-end {
+    width: 60px;
+    height: 60px;
+    fill: #ff4d6d;
+    filter: drop-shadow(0 4px 15px rgba(255, 77, 109, 0.4));
+    animation: heartbeat 1.2s infinite cubic-bezier(0.25, 0, 0, 1);
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.15); }
+    40% { transform: scale(1.05); }
+    55% { transform: scale(1.22); }
+}
+
+/* Falling Hearts */
+.falling-heart {
+    position: absolute;
+    pointer-events: none;
+    z-index: 999;
+    fill: #ff758f;
+    opacity: 0;
+    filter: drop-shadow(0 2px 6px rgba(255, 117, 143, 0.15));
+}
+
+/* Global animations & helpers */
+@keyframes pulseGlow {
+    0% { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.1)); }
+    100% { filter: drop-shadow(0 0 10px rgba(197, 163, 255, 0.3)); }
+}
+
+/* Responsive adjustments */
+@media(max-width: 768px) {
+    body {
+        cursor: auto; /* Show default cursor on mobile */
+    }
+    
+    #custom-cursor {
+        display: none !important;
+    }
+    
+    .title-gate {
+        font-size: 2.2rem;
+    }
+    
+    .poetic-text {
+        font-size: 1.4rem;
+        line-height: 1.6;
+    }
+    
+    .choice-title {
+        font-size: 2rem;
+    }
+    
+    .music-btn {
+        top: 20px;
+        right: 20px;
+        padding: 8px 14px;
+    }
+    
+    .music-text {
+        display: none;
+    }
+}

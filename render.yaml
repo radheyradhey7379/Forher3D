@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: apology-3d-journey
+    env: static
+    buildCommand: npm run build
+    publishPath: dist
