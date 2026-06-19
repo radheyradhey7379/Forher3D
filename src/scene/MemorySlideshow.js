@@ -16,14 +16,13 @@ export class MemorySlideshow {
         this.polaroids = [];
         this.currentIndex = -1;
         
-        // Memory data
         this.memoriesData = [
-            { text: "Cozy coffee talks", file: "/textures/memory_1.jpg", isVideo: false },
-            { text: "Under starry skies", file: "/textures/memory_2.jpg", isVideo: false },
-            { text: "Laughing in the rain", file: "/textures/memory_3.jpg", isVideo: false },
-            { text: "Golden hour shoreline", file: "/textures/memory_4.jpg", isVideo: false },
-            { text: "Scenic long roads", file: "/textures/memory_5.jpg", isVideo: false },
-            { text: "A memory in motion", file: "/textures/memory_video.mp4", isVideo: true }
+            { text: "Cozy coffee talks", file: "textures/memory_1.jpg", isVideo: false },
+            { text: "Under starry skies", file: "textures/memory_2.jpg", isVideo: false },
+            { text: "Laughing in the rain", file: "textures/memory_3.jpg", isVideo: false },
+            { text: "Golden hour shoreline", file: "textures/memory_4.jpg", isVideo: false },
+            { text: "Scenic long roads", file: "textures/memory_5.jpg", isVideo: false },
+            { text: "A memory in motion", file: "textures/memory_video.mp4", isVideo: true }
         ];
         
         // Load textures and build Polaroids
@@ -90,6 +89,36 @@ export class MemorySlideshow {
                     undefined,
                     (err) => {
                         console.error("Failed to load photo texture", data.file, err);
+                        
+                        // Fallback texture so app never hangs on load failures
+                        const dummyCanvas = document.createElement('canvas');
+                        dummyCanvas.width = 16;
+                        dummyCanvas.height = 16;
+                        const dummyCtx = dummyCanvas.getContext('2d');
+                        dummyCtx.fillStyle = '#ffc8dd';
+                        dummyCtx.fillRect(0, 0, 16, 16);
+                        const dummyTexture = new THREE.CanvasTexture(dummyCanvas);
+                        
+                        const polaroid = this.createPhotoPolaroidMesh(dummyTexture, data.text);
+                        polaroid.position.set(0, 0.4, -20);
+                        polaroid.scale.set(0, 0, 0);
+                        polaroid.children.forEach(c => c.material.opacity = 0);
+                        
+                        polaroid.userData = {
+                            index: index,
+                            targetY: 0.4,
+                            phase: Math.random() * Math.PI * 2,
+                            isFocused: false
+                        };
+                        
+                        this.group.add(polaroid);
+                        this.polaroids.push(polaroid);
+                        
+                        loadedCount++;
+                        if (loadedCount === this.memoryCount && typeof onReady === 'function') {
+                            this.polaroids.sort((a, b) => a.userData.index - b.userData.index);
+                            onReady();
+                        }
                     }
                 );
             }
