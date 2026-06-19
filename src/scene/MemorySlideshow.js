@@ -11,19 +11,19 @@ export class MemorySlideshow {
         this.group = new THREE.Group();
         this.scene.add(this.group);
         
-        // Slideshow Config
+        // Slideshow Config (5 pics + 1 video = 6 items)
         this.memoryCount = 6;
         this.polaroids = [];
         this.currentIndex = -1;
         
         // Memory data
         this.memoriesData = [
-            { text: "Cozy coffee talks", file: "/textures/memory_1.png" },
-            { text: "Under starry skies", file: "/textures/memory_2.png" },
-            { text: "Laughing in the rain", file: "/textures/memory_3.png" },
-            { text: "Golden hour shoreline", file: "/textures/memory_4.png" },
-            { text: "Scenic long roads", file: "/textures/memory_5.png" },
-            { text: "Warm winter nights", file: "/textures/memory_6.png" }
+            { text: "Cozy coffee talks", file: "/textures/memory_1.jpg", isVideo: false },
+            { text: "Under starry skies", file: "/textures/memory_2.jpg", isVideo: false },
+            { text: "Laughing in the rain", file: "/textures/memory_3.jpg", isVideo: false },
+            { text: "Golden hour shoreline", file: "/textures/memory_4.jpg", isVideo: false },
+            { text: "Scenic long roads", file: "/textures/memory_5.jpg", isVideo: false },
+            { text: "A memory in motion", file: "/textures/memory_video.mp4", isVideo: true }
         ];
         
         // Load textures and build Polaroids
@@ -37,83 +37,159 @@ export class MemorySlideshow {
         let loadedCount = 0;
         
         this.memoriesData.forEach((data, index) => {
-            this.textureLoader.load(
-                data.file,
-                (texture) => {
-                    const polaroid = this.createPolaroidMesh(texture, data.text);
-                    
-                    // Put all polaroids far in the background and scale 0 initially
-                    polaroid.position.set(0, 0.4, -20);
-                    polaroid.scale.set(0, 0, 0);
-                    polaroid.material.opacity = 0;
-                    
-                    // Store starting values for floating animation
-                    polaroid.userData = {
-                        index: index,
-                        targetY: 0.4,
-                        phase: Math.random() * Math.PI * 2,
-                        isFocused: false
-                    };
-                    
-                    this.group.add(polaroid);
-                    this.polaroids.push(polaroid);
-                    
-                    loadedCount++;
-                    if (loadedCount === this.memoryCount && typeof onReady === 'function') {
-                        // Sort by index to maintain correct order
-                        this.polaroids.sort((a, b) => a.userData.index - b.userData.index);
-                        onReady();
-                    }
-                },
-                undefined,
-                (err) => {
-                    console.error("Failed to load memory texture", data.file, err);
+            if (data.isVideo) {
+                // Setup video element & polaroid directly
+                const polaroid = this.createVideoPolaroidMesh(data.file, data.text);
+                polaroid.position.set(0, 0.4, -20);
+                polaroid.scale.set(0, 0, 0);
+                polaroid.children.forEach(c => c.material.opacity = 0);
+                
+                polaroid.userData = {
+                    index: index,
+                    targetY: 0.4,
+                    phase: Math.random() * Math.PI * 2,
+                    isFocused: false,
+                    video: polaroid.userData.video
+                };
+                
+                this.group.add(polaroid);
+                this.polaroids.push(polaroid);
+                
+                loadedCount++;
+                if (loadedCount === this.memoryCount && typeof onReady === 'function') {
+                    this.polaroids.sort((a, b) => a.userData.index - b.userData.index);
+                    onReady();
                 }
-            );
+            } else {
+                // Load photo
+                this.textureLoader.load(
+                    data.file,
+                    (texture) => {
+                        texture.colorSpace = THREE.SRGBColorSpace;
+                        const polaroid = this.createPhotoPolaroidMesh(texture, data.text);
+                        polaroid.position.set(0, 0.4, -20);
+                        polaroid.scale.set(0, 0, 0);
+                        polaroid.children.forEach(c => c.material.opacity = 0);
+                        
+                        polaroid.userData = {
+                            index: index,
+                            targetY: 0.4,
+                            phase: Math.random() * Math.PI * 2,
+                            isFocused: false
+                        };
+                        
+                        this.group.add(polaroid);
+                        this.polaroids.push(polaroid);
+                        
+                        loadedCount++;
+                        if (loadedCount === this.memoryCount && typeof onReady === 'function') {
+                            this.polaroids.sort((a, b) => a.userData.index - b.userData.index);
+                            onReady();
+                        }
+                    },
+                    undefined,
+                    (err) => {
+                        console.error("Failed to load photo texture", data.file, err);
+                    }
+                );
+            }
         });
     }
     
-    createPolaroidMesh(photoTexture, captionText) {
+    createFrameMesh(captionText) {
         const canvas = document.createElement('canvas');
         canvas.width = 512;
         canvas.height = 640;
         const ctx = canvas.getContext('2d');
         
-        // 1. Off-white background
+        // 1. Polaroid off-white frame
         ctx.fillStyle = '#fbf9f4';
         ctx.fillRect(0, 0, 512, 640);
         
-        // 2. Photo frame shadow
+        // 2. Photo frame shadow outline
         ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
         ctx.fillRect(28, 28, 456, 456);
         
-        // 3. Draw photo
-        if (photoTexture.image) {
-            ctx.drawImage(photoTexture.image, 32, 32, 448, 448);
-        } else {
-            ctx.fillStyle = '#ffc8dd';
-            ctx.fillRect(32, 32, 448, 448);
-        }
-        
-        // 4. Caption
+        // 3. Caption
         ctx.fillStyle = '#1c1c1c';
         ctx.textAlign = 'center';
         ctx.font = 'italic 25px "Cormorant Garamond", Georgia, serif';
         ctx.fillText(captionText, 256, 552);
         
-        const canvasTexture = new THREE.CanvasTexture(canvas);
-        canvasTexture.colorSpace = THREE.SRGBColorSpace;
+        const frameTexture = new THREE.CanvasTexture(canvas);
+        frameTexture.colorSpace = THREE.SRGBColorSpace;
         
         const geometry = new THREE.PlaneGeometry(3.6, 4.5);
         const material = new THREE.MeshBasicMaterial({
-            map: canvasTexture,
+            map: frameTexture,
             transparent: true,
             opacity: 0,
             side: THREE.DoubleSide
         });
         
-        const mesh = new THREE.Mesh(geometry, material);
-        return mesh;
+        return new THREE.Mesh(geometry, material);
+    }
+    
+    createPhotoPolaroidMesh(photoTexture, captionText) {
+        const group = new THREE.Group();
+        
+        // 1. Frame mesh
+        const frameMesh = this.createFrameMesh(captionText);
+        group.add(frameMesh);
+        
+        // 2. Photo content mesh
+        const photoGeo = new THREE.PlaneGeometry(3.15, 3.15);
+        const photoMat = new THREE.MeshBasicMaterial({
+            map: photoTexture,
+            transparent: true,
+            opacity: 0,
+            side: THREE.DoubleSide
+        });
+        
+        const photoMesh = new THREE.Mesh(photoGeo, photoMat);
+        photoMesh.position.set(0, 0.5, 0.015); // Offset forward to avoid z-fighting
+        group.add(photoMesh);
+        
+        return group;
+    }
+    
+    createVideoPolaroidMesh(videoSrc, captionText) {
+        const group = new THREE.Group();
+        
+        // 1. Frame mesh
+        const frameMesh = this.createFrameMesh(captionText);
+        group.add(frameMesh);
+        
+        // 2. Video element
+        const video = document.createElement('video');
+        video.src = videoSrc;
+        video.crossOrigin = 'anonymous';
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.setAttribute('webkit-playsinline', 'true');
+        video.load();
+        
+        const videoTexture = new THREE.VideoTexture(video);
+        videoTexture.colorSpace = THREE.SRGBColorSpace;
+        
+        // 3. Video content mesh
+        const videoGeo = new THREE.PlaneGeometry(3.15, 3.15);
+        const videoMat = new THREE.MeshBasicMaterial({
+            map: videoTexture,
+            transparent: true,
+            opacity: 0,
+            side: THREE.DoubleSide
+        });
+        
+        const videoMesh = new THREE.Mesh(videoGeo, videoMat);
+        videoMesh.position.set(0, 0.5, 0.015);
+        group.add(videoMesh);
+        
+        // Store video reference on group
+        group.userData = { video: video };
+        
+        return group;
     }
     
     showSlide(index) {
@@ -127,9 +203,14 @@ export class MemorySlideshow {
             const oldPolaroid = this.polaroids[oldIndex];
             oldPolaroid.userData.isFocused = false;
             
+            // If old slide had a video, pause it
+            if (oldPolaroid.userData.video) {
+                oldPolaroid.userData.video.pause();
+            }
+            
             // Fly current slide past the camera (zoom in/scale up and fade out)
             gsap.to(oldPolaroid.position, {
-                z: 11.0, // flies past camera at z = 8.5
+                z: 11.0, 
                 y: 1.0,
                 duration: 1.0,
                 ease: 'power2.in'
@@ -141,23 +222,28 @@ export class MemorySlideshow {
                 duration: 1.0,
                 ease: 'power2.in'
             });
-            gsap.to(oldPolaroid.material, {
-                opacity: 0,
-                duration: 0.9,
-                ease: 'power2.in',
-                onComplete: () => {
-                    // Reset to background stack once completely faded
+            
+            oldPolaroid.children.forEach(c => {
+                gsap.to(c.material, {
+                    opacity: 0,
+                    duration: 0.9,
+                    ease: 'power2.in'
+                });
+            });
+            
+            // Reset position after fade
+            setTimeout(() => {
+                if (this.currentIndex !== oldIndex) { // make sure user didn't instantly scroll back
                     oldPolaroid.position.set(0, 0.4, -20);
                     oldPolaroid.scale.set(0, 0, 0);
                 }
-            });
+            }, 1000);
         }
         
         // 2. Anim in new slide
         const newPolaroid = this.polaroids[index];
-        newPolaroid.position.set(0, 0.2, -18); // start deep in background
+        newPolaroid.position.set(0, 0.2, -18); 
         newPolaroid.scale.set(0.1, 0.1, 0.1);
-        newPolaroid.material.opacity = 0;
         
         // Fly in from background and stop at focus z = 3.5 (camera is at z = 8.5)
         gsap.to(newPolaroid.position, {
@@ -167,6 +253,12 @@ export class MemorySlideshow {
             ease: 'back.out(1.2)',
             onComplete: () => {
                 newPolaroid.userData.isFocused = true;
+                // Play video if it's the video slide
+                if (newPolaroid.userData.video) {
+                    newPolaroid.userData.video.play().catch(err => {
+                        console.warn("Video autoplay failed, waiting for user click.", err);
+                    });
+                }
             }
         });
         
@@ -178,10 +270,12 @@ export class MemorySlideshow {
             ease: 'back.out(1.2)'
         });
         
-        gsap.to(newPolaroid.material, {
-            opacity: 1,
-            duration: 1.0,
-            ease: 'power2.out'
+        newPolaroid.children.forEach(c => {
+            gsap.to(c.material, {
+                opacity: 1,
+                duration: 1.0,
+                ease: 'power2.out'
+            });
         });
     }
     
@@ -194,7 +288,6 @@ export class MemorySlideshow {
         this.polaroids.forEach((polaroid) => {
             if (polaroid.userData.isFocused) {
                 const ud = polaroid.userData;
-                // Soft hover float
                 polaroid.position.y = ud.targetY + Math.sin(elapsed * 1.5 + ud.phase) * 0.08;
                 polaroid.rotation.z = Math.sin(elapsed * 0.7 + ud.phase) * 0.015;
             }
@@ -203,6 +296,9 @@ export class MemorySlideshow {
     
     fadeOutAll(duration = 1.5) {
         this.polaroids.forEach((p) => {
+            if (p.userData.video) {
+                p.userData.video.pause();
+            }
             gsap.to(p.scale, {
                 x: 0,
                 y: 0,
@@ -210,10 +306,12 @@ export class MemorySlideshow {
                 duration: duration,
                 ease: 'power2.inOut'
             });
-            gsap.to(p.material, {
-                opacity: 0,
-                duration: duration,
-                ease: 'power2.inOut'
+            p.children.forEach(c => {
+                gsap.to(c.material, {
+                    opacity: 0,
+                    duration: duration,
+                    ease: 'power2.inOut'
+                });
             });
         });
     }
@@ -221,9 +319,16 @@ export class MemorySlideshow {
     destroy() {
         this.app.unregisterUpdatable(this);
         this.polaroids.forEach((p) => {
-            p.geometry.dispose();
-            p.material.map.dispose();
-            p.material.dispose();
+            if (p.userData.video) {
+                p.userData.video.pause();
+                p.userData.video.src = "";
+                p.userData.video.load();
+            }
+            p.children.forEach(c => {
+                c.geometry.dispose();
+                if (c.material.map) c.material.map.dispose();
+                c.material.dispose();
+            });
         });
         this.scene.remove(this.group);
     }
